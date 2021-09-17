@@ -6,7 +6,7 @@ const NknContext = createContext()
 const useWallet = () => {
     const [wallet, setWallet] = useState(null)
     useEffect(() => {
-        setWallet(new nkn.Wallet())
+        setWallet(new nkn.Wallet({ rpcServerAddr: 'http://mainnet-seed-0001.nkn.org:30003' }))
     },[])
 
     return wallet
