@@ -12,9 +12,8 @@ export const useCanvas = () => {
     const [canvas,setCanvas] = useState(null)
     const [width, setWidth ] = useState(300)
     const [height, setHeight] = useState(150)
-    const destinations = useRef([])
-    const [readyDestinations,setReadyDestinations] = useState(false)
-    const {onMessageType, publishTo, getSubscribers, isConnected,unSubscribe, subscribeTo, sendTo, client} = useNkn()
+    const [topic,setTopic] = useState('')
+    const {onMessageType, publishTo,getSubscription, isConnected,unSubscribe, subscribeTo} = useNkn()
     const noDuplicate = (arr1, arr2) => {
         let newArr = [...arr1]
         for (let el2 of arr2) {
@@ -30,35 +29,46 @@ export const useCanvas = () => {
         }
         return newArr
     }
-    const getDestinations = async topic => {
+    const testingSubscription = async topic => {
         try {
-            let res = await getSubscribers(topic)
-            destinations.current = [...res.subscribers,client.addr]
-            setReadyDestinations(true)
+            console.log(await getSubscription(topic))
+        } catch (err) {
+            console.log(err)
+        }
+    }
+    const subscribing = async topic => {
+        try {
+            console.log(await subscribeTo(topic))
         } catch (err) {
             console.log(err)
         }
     }
     useEffect(() => {
         if (isConnected) {
-            const topic = location.pathname.slice(1)
-            if (topic !== localStorage.getItem('subscription')) unSubscribe(localStorage.getItem('subscription'))
-            getDestinations(topic)
-            subscribeTo(topic)
-            localStorage.setItem('subscription', topic)
+            const savedTopic = location.pathname.slice(1)
+            if (savedTopic !== localStorage.getItem('subscription')) unSubscribe(localStorage.getItem('subscription'))
+            setTopic(savedTopic)
+            subscribing(savedTopic)
+            localStorage.setItem('subscription', savedTopic)
             setCanvas(new fabric.Canvas(canvasRef.current))
         }
     }, [canvasRef,isConnected])
 
-    useEffect(() => {
-        if(readyDestinations) console.log(destinations.current)
-    },[readyDestinations,destinations])
 
     useEffect(() => {
         if (canvas) {
             canvas.isDrawingMode = true
+            const interval = setInterval(async () => {
+                let subs = await getSubscription(topic)
+                console.log('CONNECTING WITH PEERS...')
+                if (subs?.expiresAt > 0) {
+                    console.log(subs)
+                    console.log('SUBSCRIBED')
+                    clearInterval(interval)
+                }
+            },1000)
             canvas.on('path:created', opt => {
-                sendTo(destinations.current,{ type: CANVAS_CHANGE, state: canvas })
+                publishTo(topic,{ type: CANVAS_CHANGE, state: canvas })
             })
             onMessageType(CANVAS_CHANGE, evt => {
                 const oldCanvas = canvas.toObject()

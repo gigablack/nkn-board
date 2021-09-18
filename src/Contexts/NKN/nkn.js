@@ -26,7 +26,7 @@ const useClient = () => {
     }
     const subscribeTo = async topic => {
         try {
-            return await client.subscribe(topic,100)
+            return await client.subscribe(topic,400000)
         } catch (err) {
             console.log(err)
         }
@@ -49,6 +49,13 @@ const useClient = () => {
     const getSubscribers = async topic => {
         try {
             return await client.getSubscribers(topic)
+        } catch (err) {
+            console.log(err)
+        }
+    }
+    const getSubscription = async topic => {
+        try {
+            return await client.getSubscription(topic,client.addr)
         } catch (err) {
             console.log(err)
         }
@@ -84,7 +91,8 @@ const useClient = () => {
         unSubscribe,
         sendTo,
         onMessageType,
-        getSubscribers
+        getSubscribers,
+        getSubscription
     }
 }
 
