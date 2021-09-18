@@ -1,6 +1,6 @@
 {
   "name": "nkn-board",
-  "homepage": "https://gigablack.github.io/nkn-board",
+  "homepage": "http://nkn-board.ml",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
